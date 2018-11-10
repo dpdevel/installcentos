@@ -3,11 +3,12 @@
 ## Default variables to use
 export INTERACTIVE=${INTERACTIVE:="true"}
 export PVS=${INTERACTIVE:="true"}
-export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
+#export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
+export DOMAIN=${DOMAIN:="$(hostname)"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=admin}
 export VERSION=${VERSION:="3.11"}
-export REPOVERSION=${REPOVERSION:=$(echo $VERSION | tr -d .)}
+export REPOVERSION=${REPOVERSION:="$(echo $VERSION | tr -d .)"}
 export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/dpdevel/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
@@ -32,6 +33,7 @@ if [ "$INTERACTIVE" = "true" ]; then
 	read -rp "OpenShift Version: ($VERSION): " choice;
 	if [ "$choice" != "" ] ; then
 		export VERSION="$choice";
+                export REPOVERSION="$(echo $VERSION | tr -d .)";
 	fi
 	read -rp "IP: ($IP): " choice;
 	if [ "$choice" != "" ] ; then
@@ -156,6 +158,11 @@ touch /etc/origin/master/htpasswd
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml
 
+if [ $? -ne 0 ]; then
+	echo "error install ocp-$VERSION"
+	exit
+fi
+
 htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
 oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
 
@@ -189,4 +196,5 @@ echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT
 echo "******"
 
 oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+
 
