@@ -1,7 +1,5 @@
 #!/bin/bash
 
-## see: https://youtu.be/aqXSbDZggK4
-
 ## Default variables to use
 export INTERACTIVE=${INTERACTIVE:="true"}
 export PVS=${INTERACTIVE:="true"}
