@@ -7,7 +7,7 @@ export INTERACTIVE=${INTERACTIVE:="true"}
 export PVS=${INTERACTIVE:="true"}
 export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
-export PASSWORD=${PASSWORD:=password}
+export PASSWORD=${PASSWORD:=admin}
 export VERSION=${VERSION:="3.11"}
 export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
@@ -86,7 +86,7 @@ yum -y --enablerepo=epel install pyOpenSSL
 curl -o ansible.rpm https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.6.5-1.el7.ans.noarch.rpm
 yum -y --enablerepo=epel install ansible.rpm
 
-[ ! -d openshift-ansible ] && git clone https://github.com/openshift/openshift-ansible.git
+[ ! -d openshift-ansible ] && git clone --branch release-${VERSION} https://github.com/openshift/openshift-ansible.git
 
 cd openshift-ansible && git fetch && git checkout release-${VERSION} && cd ..
 
@@ -160,24 +160,24 @@ ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml
 htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
 oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
 
-if [ "$PVS" = "true" ]; then
-
-	curl -o vol.yaml $SCRIPT_REPO/vol.yaml
-
-	for i in `seq 1 200`;
-	do
-		DIRNAME="vol$i"
-		mkdir -p /mnt/data/$DIRNAME 
-		chcon -Rt svirt_sandbox_file_t /mnt/data/$DIRNAME
-		chmod 777 /mnt/data/$DIRNAME
-		
-		sed "s/name: vol/name: vol$i/g" vol.yaml > oc_vol.yaml
-		sed -i "s/path: \/mnt\/data\/vol/path: \/mnt\/data\/vol$i/g" oc_vol.yaml
-		oc create -f oc_vol.yaml
-		echo "created volume $i"
-	done
-	rm oc_vol.yaml
-fi
+#if [ "$PVS" = "true" ]; then
+#
+#	curl -o vol.yaml $SCRIPT_REPO/vol.yaml
+#
+#	for i in `seq 1 200`;
+#	do
+#		DIRNAME="vol$i"
+#		mkdir -p /mnt/data/$DIRNAME 
+#		chcon -Rt svirt_sandbox_file_t /mnt/data/$DIRNAME
+#		chmod 777 /mnt/data/$DIRNAME
+#		
+#		sed "s/name: vol/name: vol$i/g" vol.yaml > oc_vol.yaml
+#		sed -i "s/path: \/mnt\/data\/vol/path: \/mnt\/data\/vol$i/g" oc_vol.yaml
+#		oc create -f oc_vol.yaml
+#		echo "created volume $i"
+#	done
+#	rm oc_vol.yaml
+#fi
 
 echo "******"
 echo "* Your console is https://console.$DOMAIN:$API_PORT"
@@ -190,3 +190,4 @@ echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT
 echo "******"
 
 oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+
