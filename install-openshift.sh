@@ -8,7 +8,7 @@ export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=admin}
 export VERSION=${VERSION:="3.11"}
 export REPOVERSION=${REPOVERSION:=$(echo $VERSION | tr -d .)}
-export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
+export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/dpdevel/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
 
