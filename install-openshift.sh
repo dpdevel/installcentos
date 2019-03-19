@@ -7,7 +7,7 @@ export PVS=${INTERACTIVE:="true"}
 export DOMAIN=${DOMAIN:="$(hostname)"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=admin}
-export VERSION=${VERSION:="3.11"}
+export VERSION=${VERSION:="3.9"}
 export REPOVERSION=${REPOVERSION:="$(echo $VERSION | tr -d .)"}
 export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/dpdevel/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
@@ -124,7 +124,7 @@ if [ ! -f ~/.ssh/id_rsa ]; then
 fi
 
 export METRICS="True"
-export LOGGING="True"
+export LOGGING="False"
 
 memory=$(cat /proc/meminfo | grep MemTotal | sed "s/MemTotal:[ ]*\([0-9]*\) kB/\1/")
 
@@ -152,19 +152,25 @@ if [ ! -z "${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}" ]; then
 	echo "openshift_no_proxy=\"${__no_proxy}\"" >> inventory.ini
 fi
 
-mkdir -p /etc/origin/master/
-touch /etc/origin/master/htpasswd
+echo "mkdir -p /etc/origin/master/"
+echo "touch /etc/origin/master/htpasswd"
 
-ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml
-ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml
+echo 
+echo
+
+echo "ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml"
+echo "ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml"
 
 if [ $? -ne 0 ]; then
 	echo "error install ocp-$VERSION"
 	exit
 fi
 
-htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
-oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
+echo 
+echo 
+
+echo "htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}"
+echo "oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}"
 
 #if [ "$PVS" = "true" ]; then
 #
@@ -195,6 +201,6 @@ echo "*"
 echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
 echo "******"
 
-oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+echo "oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
 
 
